@@ -1,0 +1,120 @@
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>matrix</title>
+  <style type="text/css">
+    body {
+     margin: 40px 0px 0px 55px;
+     background-color: #ddddcc;
+    }
+    pre {
+      font-family: Consolas, monaco, monospace;
+      display: inline;
+    }
+    div{
+      position: relative;
+    }
+    .matrix0{
+      color: #008000;
+      background-color: #000000;
+      font-size: 1.25em;
+      line-height: 1em;
+      margin: 0px 0px 0px 0px;
+    }
+    .matrix1{
+      color: #80ff00;
+      font-size: 1.25em;
+      position:absolute; top:0; left:0;
+      line-height: 1em;
+      margin: 0px 0px 0px 0px;
+    }
+    .indent{
+      text-indent: 1em;
+    }
+    </style>
+</head>
+<script src="../js/gameloop.js"></script>
+<script>
+
+var eventDirty = false;
+var gameState = 0;
+var output0 = [];
+var frameSync=0;
+
+var gameLoop=new GameLoop(draw,setup,initialize);
+    gameLoop.fps=8;
+    gameLoop.startTime=gameLoop.creationTime+1000;
+
+var screen0;
+var screen1;
+
+function initDOM(){
+  screen0=document.getElementById('screen0');
+  screen1=document.getElementById('screen1');
+  log=document.getElementById('log');
+  }
+
+function initialize(){
+  // aka eventHandler
+  if(eventDirty){
+    var fps=parseFloat(document.getElementById('fps').value);
+    if(fps&&fps>0){gameLoop.fps=fps;}
+    else{document.getElementById('fps').value='ERROR';}
+    eventDirty=false;
+    }
+
+  }//end initialize
+
+function setup(fps,frameCount,timeStamp){
+  // aka gameStateHandler
+  frameSync+=frameCount-1;
+
+  output0 = [];
+  output1 = [];
+  var i=0;
+  var j=0;
+  while(j<12){
+    i=0;
+    output0.push('      ');
+    output1.push('      ');
+    while(i<24){
+      if(Math.random()>1/64){
+        output0.push((Math.random()>.5)?1:0);
+        output1.push(' ');
+      }
+      else{
+        output1.push((Math.random()>.5)?1:0);
+        output0.push(' ');
+      }
+
+      i++;}
+    output0.push('      \n');
+    output1.push('      \n');
+    j++;}
+
+  }//end setup
+
+function draw() {
+  // draw
+  screen0.innerText = output0.join('');
+  screen1.innerText = output1.join('');
+  log.innerText = frameSync;
+
+  }//end draw
+
+</script>
+
+<body onLoad="initDOM()">
+  <h3 class="indent">Text Animation</h3>
+
+  FPS: <input id="fps" type="text" value="8.0">
+  <input type="button" onclick="eventDirty=true;" value="change">
+  <br>
+  <br>
+<div>
+<pre id="screen0" class="matrix0"></pre>
+<pre id="screen1" class="matrix1"></pre>
+</div>
+<div class="indent">frame sync: <pre id="log">0</pre></div>
+</body>
+</html>

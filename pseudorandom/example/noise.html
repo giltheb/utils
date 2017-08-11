@@ -1,0 +1,183 @@
+<input type="button" value="hash2D" onClick="hash();"> : 
+<input type="button" value="RND16s8" onClick="rnd(rnd16s8);">
+<input type="button" value="RND32s8" onClick="rnd(rnd32s8);">
+<input type="button" value="RND64s8" onClick="rnd(rnd64s8);">
+<input type="button" value="Math.random" onClick="rnd(rand);">
+<br><canvas id="canvas" height="512" width="512"></canvas>
+<br><pre id="log"></pre>
+<script type="text/javascript">
+/*
+license CC BY 4.0 GiLTheB,2017
+*/
+
+/*
+//Ken Perlin's  table
+var p=new Uint8Array([151,160,137,91,90,15,
+131,13,201,95,96,53,194,233,7,225,140,36,103,30,69,142,8,99,37,240,21,10,23,
+190, 6,148,247,120,234,75,0,26,197,62,94,252,219,203,117,35,11,32,57,177,33,
+88,237,149,56,87,174,20,125,136,171,168, 68,175,74,165,71,134,139,48,27,166,
+77,146,158,231,83,111,229,122,60,211,133,230,220,105,92,41,55,46,245,40,244,
+102,143,54, 65,25,63,161, 1,216,80,73,209,76,132,187,208, 89,18,169,200,196,
+135,130,116,188,159,86,164,100,109,198,173,186, 3,64,52,217,226,250,124,123,
+5,202,38,147,118,126,255,82,85,212,207,206,59,227,47,16,58,17,182,189,28,42,
+223,183,170,213,119,248,152, 2,44,154,163, 70,221,153,101,155,167, 43,172,9,
+129,22,39,253, 19,98,108,110,79,113,224,232,178,185, 112,104,218,246,97,228,
+251,34,242,193,238,210,144,12,191,179,162,241, 81,51,145,235,249,14,239,107,
+49,192,214, 31,181,199,106,157,184, 84,204,176,115,121,50,45,127, 4,150,254,
+138,236,205,93,222,114,67,29,24,72,243,141,128,195,78,66,215,61,156,180
+]);
+*/
+
+//Rijndael's S-box
+var p=new Uint8Array([0x63,0x7C,0x77,0x7B,0xF2,0x6B,0x6F,0xC5,0x30,0x01,0x67,0x2B,0xFE,0xD7,0xAB,0x76,
+0xCA,0x82,0xC9,0x7D,0xFA,0x59,0x47,0xF0,0xAD,0xD4,0xA2,0xAF,0x9C,0xA4,0x72,0xC0,
+0xB7,0xFD,0x93,0x26,0x36,0x3F,0xF7,0xCC,0x34,0xA5,0xE5,0xF1,0x71,0xD8,0x31,0x15,
+0x04,0xC7,0x23,0xC3,0x18,0x96,0x05,0x9A,0x07,0x12,0x80,0xE2,0xEB,0x27,0xB2,0x75,
+0x09,0x83,0x2C,0x1A,0x1B,0x6E,0x5A,0xA0,0x52,0x3B,0xD6,0xB3,0x29,0xE3,0x2F,0x84,
+0x53,0xD1,0x00,0xED,0x20,0xFC,0xB1,0x5B,0x6A,0xCB,0xBE,0x39,0x4A,0x4C,0x58,0xCF,
+0xD0,0xEF,0xAA,0xFB,0x43,0x4D,0x33,0x85,0x45,0xF9,0x02,0x7F,0x50,0x3C,0x9F,0xA8,
+0x51,0xA3,0x40,0x8F,0x92,0x9D,0x38,0xF5,0xBC,0xB6,0xDA,0x21,0x10,0xFF,0xF3,0xD2,
+0xCD,0x0C,0x13,0xEC,0x5F,0x97,0x44,0x17,0xC4,0xA7,0x7E,0x3D,0x64,0x5D,0x19,0x73,
+0x60,0x81,0x4F,0xDC,0x22,0x2A,0x90,0x88,0x46,0xEE,0xB8,0x14,0xDE,0x5E,0x0B,0xDB,
+0xE0,0x32,0x3A,0x0A,0x49,0x06,0x24,0x5C,0xC2,0xD3,0xAC,0x62,0x91,0x95,0xE4,0x79,
+0xE7,0xC8,0x37,0x6D,0x8D,0xD5,0x4E,0xA9,0x6C,0x56,0xF4,0xEA,0x65,0x7A,0xAE,0x08,
+0xBA,0x78,0x25,0x2E,0x1C,0xA6,0xB4,0xC6,0xE8,0xDD,0x74,0x1F,0x4B,0xBD,0x8B,0x8A,
+0x70,0x3E,0xB5,0x66,0x48,0x03,0xF6,0x0E,0x61,0x35,0x57,0xB9,0x86,0xC1,0x1D,0x9E,
+0xE1,0xF8,0x98,0x11,0x69,0xD9,0x8E,0x94,0x9B,0x1E,0x87,0xE9,0xCE,0x55,0x28,0xDF,
+0x8C,0xA1,0x89,0x0D,0xBF,0xE6,0x42,0x68,0x41,0x99,0x2D,0x0F,0xB0,0x54,0xBB,0x16
+]);
+
+
+function hash1D(x){
+return p[x];
+}
+function hash2D(x,y){
+return p[(x+p[y])&255];
+}
+function hash3D(x,y,z){
+return p[(x+p[(y+p[z])&255])&255];
+}
+function hash4D(x,y,z,w){
+return p[(x+p[(y+p[(z+p[w])&255])&255])&255];
+}
+
+/*
+the use of typed array simplifies thing but you can use methods below
+
+all bitwise operations format the result as a 32 bit integer
+
+you can get a signed 32 integer with the hint |0  ex:0xffffffffffff|0 = -1;	(any type -> 32bit)
+you can get a unsigned 32bit with >>>0            ex:-1>>>0 =   4294967295;	(n32bit -> u32bit)
+
+*/
+
+var b=new ArrayBuffer(14);
+var h16=new Uint8Array(b,0,2);
+var h32=new Uint8Array(b,2,4);
+var h64=new Uint8Array(b,6,8);
+
+var prime=[31,37,41,43,47,53,59,61];
+
+h16[0]=prime[0];
+h16[1]=prime[1];
+
+h32[0]=prime[0];
+h32[1]=prime[1];
+h32[2]=prime[2];
+h32[3]=prime[3];
+
+h64[0]=prime[0];
+h64[1]=prime[1];
+h64[2]=prime[2];
+h64[3]=prime[3];
+h64[4]=prime[4];
+h64[5]=prime[5];
+h64[6]=prime[6];
+h64[7]=prime[7];
+
+function rnd16s8(){
+h16[0]=p[h16[0]];
+h16[1]=p[(h16[0]+p[h16[1]])&255];
+
+return h16[1];
+}
+
+function rnd32s8(){
+h32[0]=p[h32[0]];
+h32[1]=p[(h32[0]+p[h32[1]])&255];
+h32[2]=p[(h32[0]+p[(h32[1]+p[h32[2]])&255])&255];
+h32[3]=p[(h32[0]+p[(h32[1]+p[(h32[2]+p[h32[3]])&255])&255])&255];
+
+return h32[3];
+}
+
+function rnd64s8(){
+h64[0]=p[h64[0]];
+h64[1]=p[(h64[0]+p[h64[1]])&255];
+h64[2]=p[(h64[0]+p[(h64[1]+p[h64[2]])&255])&255];
+h64[3]=p[(h64[0]+p[(h64[1]+p[(h64[2]+p[h64[3]])&255])&255])&255];
+h64[4]=p[(h64[0]+p[(h64[1]+p[(h64[2]+p[(h64[3]+p[h64[4]])&255])&255])&255])&255];
+h64[5]=p[(h64[0]+p[(h64[1]+p[(h64[2]+p[(h64[3]+p[(h64[4]+p[h64[5]])&255])&255])&255])&255])&255];
+h64[6]=p[(h64[0]+p[(h64[1]+p[(h64[2]+p[(h64[3]+p[(h64[4]+p[(h64[5]+p[h64[6]])&255])&255])&255])&255])&255])&255];
+h64[7]=p[(h64[0]+p[(h64[1]+p[(h64[2]+p[(h64[3]+p[(h64[4]+p[(h64[5]+p[(h64[6]+p[h64[7]])&255])&255])&255])&255])&255])&255])&255];
+
+return h64[7];
+}
+
+function rand(){
+return (Math.random()*256)|0;
+}
+
+var canvas = document.getElementById('canvas');
+var canvasWidth  = canvas.width;
+var canvasHeight = canvas.height;
+var ctx = canvas.getContext('2d');
+var imageData = ctx.getImageData(0, 0, canvasWidth, canvasHeight);
+
+var data=new Int32Array( imageData.data.buffer );
+
+var mod=0;
+var exp=1;
+var pow=1;
+var isPowerOfTwo=(canvasWidth!=0)&&((canvasWidth&(canvasWidth-1))==0);
+if(isPowerOfTwo){mod=canvasWidth-1;while(1){pow*=2;if(pow==canvasWidth)break;exp++;}}
+/*
+modulo by a PowerOfTwo   a%[2^N] == a&([2^N]-1)
+divide by a PowerOfTwo   a/[2^N] == a>>N
+*/
+function hash(){
+var i=0;
+var len=canvasWidth*canvasHeight;
+var grey=0;
+var t0=performance.now();
+if(isPowerOfTwo){
+while(i<len){
+grey=hash2D((i&mod)&255,(i>>exp)&255);
+data[i]=(255<<24)|(grey<<16)|(grey<<8)|grey;
+i++;}
+}else{
+while(i<len){
+grey=hash2D((i%canvasWidth)&255,((i/canvasWidth)|0)&255);
+data[i]=(255<<24)|(grey<<16)|(grey<<8)|grey;
+i++;}
+}
+var t1=performance.now();
+document.getElementById('log').innerText=(t1-t0).toFixed(4)+'ms for '+(len)+' pixels';
+ctx.putImageData(imageData, 0, 0);
+}
+
+function rnd(rndFunc){
+var len=canvasWidth*canvasHeight;
+var i=0;
+var grey=0;
+var t0=performance.now();
+while(i<len){
+grey=rndFunc();
+data[i]=(255<<24)|(grey<<16)|(grey<<8)|grey;
+i++;}
+var t1=performance.now();
+document.getElementById('log').innerText=(t1-t0).toFixed(4)+'ms for '+(len)+' pixels';
+ctx.putImageData(imageData, 0, 0);
+}
+
+</script>
