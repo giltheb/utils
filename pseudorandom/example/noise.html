@@ -1,4 +1,5 @@
 <input type="button" value="hash2D" onClick="hash();"> : 
+<input type="button" value="RND8s8" onClick="rnd(rnd8s8);">
 <input type="button" value="RND16s8" onClick="rnd(rnd16s8);">
 <input type="button" value="RND32s8" onClick="rnd(rnd32s8);">
 <input type="button" value="RND64s8" onClick="rnd(rnd64s8);">
@@ -12,7 +13,8 @@ license CC BY 4.0 GiLTheB,2017
 
 /*
 //Ken Perlin's  table
-var p=new Uint8Array([151,160,137,91,90,15,
+var p=new Uint8Array([
+151,160,137,91,90,15,
 131,13,201,95,96,53,194,233,7,225,140,36,103,30,69,142,8,99,37,240,21,10,23,
 190, 6,148,247,120,234,75,0,26,197,62,94,252,219,203,117,35,11,32,57,177,33,
 88,237,149,56,87,174,20,125,136,171,168, 68,175,74,165,71,134,139,48,27,166,
@@ -29,7 +31,9 @@ var p=new Uint8Array([151,160,137,91,90,15,
 */
 
 //Rijndael's S-box
-var p=new Uint8Array([0x63,0x7C,0x77,0x7B,0xF2,0x6B,0x6F,0xC5,0x30,0x01,0x67,0x2B,0xFE,0xD7,0xAB,0x76,
+p=(function(){
+var sbox=new Uint8Array([
+0x63,0x7C,0x77,0x7B,0xF2,0x6B,0x6F,0xC5,0x30,0x01,0x67,0x2B,0xFE,0xD7,0xAB,0x76,
 0xCA,0x82,0xC9,0x7D,0xFA,0x59,0x47,0xF0,0xAD,0xD4,0xA2,0xAF,0x9C,0xA4,0x72,0xC0,
 0xB7,0xFD,0x93,0x26,0x36,0x3F,0xF7,0xCC,0x34,0xA5,0xE5,0xF1,0x71,0xD8,0x31,0x15,
 0x04,0xC7,0x23,0xC3,0x18,0x96,0x05,0x9A,0x07,0x12,0x80,0xE2,0xEB,0x27,0xB2,0x75,
@@ -46,37 +50,33 @@ var p=new Uint8Array([0x63,0x7C,0x77,0x7B,0xF2,0x6B,0x6F,0xC5,0x30,0x01,0x67,0x2
 0xE1,0xF8,0x98,0x11,0x69,0xD9,0x8E,0x94,0x9B,0x1E,0x87,0xE9,0xCE,0x55,0x28,0xDF,
 0x8C,0xA1,0x89,0x0D,0xBF,0xE6,0x42,0x68,0x41,0x99,0x2D,0x0F,0xB0,0x54,0xBB,0x16
 ]);
-
+var p0=new Uint8Array(512);var i=0;while(i<256){p0[i]=sbox[i];p0[i+256]=sbox[i];i++;}
+return p0;
+})();
 
 function hash1D(x){
 return p[x];
 }
 function hash2D(x,y){
-return p[(x+p[y])&255];
+return p[x+p[y]];
 }
 function hash3D(x,y,z){
-return p[(x+p[(y+p[z])&255])&255];
+return p[x+p[y+p[z]]];
 }
 function hash4D(x,y,z,w){
-return p[(x+p[(y+p[(z+p[w])&255])&255])&255];
+return p[x+p[y+p[z+p[w]]]];
 }
 
-/*
-the use of typed array simplifies thing but you can use methods below
+b=new ArrayBuffer(15);
+h8=new Uint8Array(b,0,1);
+h16=new Uint8Array(b,1,2);
+h32=new Uint8Array(b,3,4);
+h64=new Uint8Array(b,7,8);
 
-all bitwise operations format the result as a 32 bit integer
+prime=[31,37,41,43,47,53,59,61];
 
-you can get a signed 32 integer with the hint |0  ex:0xffffffffffff|0 = -1;	(any type -> 32bit)
-you can get a unsigned 32bit with >>>0            ex:-1>>>0 =   4294967295;	(n32bit -> u32bit)
-
-*/
-
-var b=new ArrayBuffer(14);
-var h16=new Uint8Array(b,0,2);
-var h32=new Uint8Array(b,2,4);
-var h64=new Uint8Array(b,6,8);
-
-var prime=[31,37,41,43,47,53,59,61];
+//states and seeds
+h16[0]=prime[0];
 
 h16[0]=prime[0];
 h16[1]=prime[1];
@@ -95,31 +95,37 @@ h64[5]=prime[5];
 h64[6]=prime[6];
 h64[7]=prime[7];
 
+function rnd8s8(){
+h8[0]=p[h8[0]];
+
+return h8[0];
+}
+
 function rnd16s8(){
 h16[0]=p[h16[0]];
-h16[1]=p[(h16[0]+p[h16[1]])&255];
+h16[1]=p[h16[0]+p[h16[1]]];
 
 return h16[1];
 }
 
 function rnd32s8(){
 h32[0]=p[h32[0]];
-h32[1]=p[(h32[0]+p[h32[1]])&255];
-h32[2]=p[(h32[0]+p[(h32[1]+p[h32[2]])&255])&255];
-h32[3]=p[(h32[0]+p[(h32[1]+p[(h32[2]+p[h32[3]])&255])&255])&255];
+h32[1]=p[h32[0]+p[h32[1]]];
+h32[2]=p[h32[0]+p[h32[1]+p[h32[2]]]];
+h32[3]=p[h32[0]+p[h32[1]+p[h32[2]+p[h32[3]]]]];
 
 return h32[3];
 }
 
 function rnd64s8(){
 h64[0]=p[h64[0]];
-h64[1]=p[(h64[0]+p[h64[1]])&255];
-h64[2]=p[(h64[0]+p[(h64[1]+p[h64[2]])&255])&255];
-h64[3]=p[(h64[0]+p[(h64[1]+p[(h64[2]+p[h64[3]])&255])&255])&255];
-h64[4]=p[(h64[0]+p[(h64[1]+p[(h64[2]+p[(h64[3]+p[h64[4]])&255])&255])&255])&255];
-h64[5]=p[(h64[0]+p[(h64[1]+p[(h64[2]+p[(h64[3]+p[(h64[4]+p[h64[5]])&255])&255])&255])&255])&255];
-h64[6]=p[(h64[0]+p[(h64[1]+p[(h64[2]+p[(h64[3]+p[(h64[4]+p[(h64[5]+p[h64[6]])&255])&255])&255])&255])&255])&255];
-h64[7]=p[(h64[0]+p[(h64[1]+p[(h64[2]+p[(h64[3]+p[(h64[4]+p[(h64[5]+p[(h64[6]+p[h64[7]])&255])&255])&255])&255])&255])&255])&255];
+h64[1]=p[h64[0]+p[h64[1]]];
+h64[2]=p[h64[0]+p[h64[1]+p[h64[2]]]];
+h64[3]=p[h64[0]+p[h64[1]+p[h64[2]+p[h64[3]]]]];
+h64[4]=p[h64[0]+p[h64[1]+p[h64[2]+p[h64[3]+p[h64[4]]]]]];
+h64[5]=p[h64[0]+p[h64[1]+p[h64[2]+p[h64[3]+p[h64[4]+p[h64[5]]]]]]];
+h64[6]=p[h64[0]+p[h64[1]+p[h64[2]+p[h64[3]+p[h64[4]+p[h64[5]+p[h64[6]]]]]]]];
+h64[7]=p[h64[0]+p[h64[1]+p[h64[2]+p[h64[3]+p[h64[4]+p[h64[5]+p[h64[6]+p[h64[7]]]]]]]]];
 
 return h64[7];
 }
