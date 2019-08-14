@@ -19,87 +19,17 @@
     }
     </style>
 </head>
-<script src="../js/gameloop.js"></script>
-<script>
+<body>
 
-var eventDirty = false;
-var gameState = 0;
-var output = [];
-var frameSync=0;
-
-var gameLoop=new GameLoop(draw,setup,initialize);
-    gameLoop.fps=8;
-    gameLoop.startTime=gameLoop.creationTime+1000;
-
-var screen;
-var log;
-
-function initDOM(){
-  screen=document.getElementById('screen');
-  log=document.getElementById('log');
-  }
-
-function initialize(){
-  // aka eventHandler
-  if(eventDirty){
-    var fps=parseFloat(document.getElementById('fps').value);
-    if(fps&&fps>0){gameLoop.fps=fps;}
-    else{document.getElementById('fps').value='ERROR';}
-    eventDirty=false;
-    }
-  }//end initialize
-
-function setup(fps,frameCount,timeStamp){
-  // aka gameStateHandler
-  var productionPerSecond = 10;
-  var displayUnit = 'u';
-  var displayState=0;
-
-  output = [];
-  gameState = gameState + (productionPerSecond / fps) * (frameCount);
-  displayState=gameState;
-  frameSync+=frameCount-1;
-
-  if (displayState < 10) {
-      output.push(' ');
-      }
-  if (displayState < 100) {
-      output.push(' ');
-      }
-  if (((displayState | 0).toString().length) > 3) {
-      displayUnit = 'K';
-      displayState = displayState / 1000;
-      }
-  if (((displayState | 0).toString().length) > 6) {
-      displayUnit = 'M';
-      displayState = displayState / 1000000;
-      }
-  if (((displayState | 0).toString().length) > 9) {
-      displayUnit = 'G';
-      displayState = displayState / 1000000000;
-      }
-  output.push(displayState.toFixed(2));
-  output.push(displayUnit);
-
-  }//end setup
-
-function draw() {
-  // draw
-  screen.innerText = output.join('');
-  log.innerText = frameSync;
-
-  }//end draw
-
-</script>
-
-<body onLoad="initDOM()">
   <h3>Incremental Game</h3>
-
-  FPS: <input id="fps" type="text" value="8.0">
+  FPS: <input id="FPS" type="text" value="8.0">
   <input type="button" onclick="eventDirty=true;" value="change">
   <br>
   <br>
-  <div>value: <pre id="screen">  0.00u</pre></div>
-  <div>frame sync: <pre id="log">0</pre></div>
+  <div>value: <pre id="DISP">  0.00u</pre></div>
+  <div>frame drop: <pre id="LOG">0</pre></div>
+
 </body>
+<script src="../js/gameloop.js"></script>
+<script src="incremental.js"></script>
 </html>

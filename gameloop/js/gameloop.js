@@ -4,76 +4,43 @@ license CC BY 4.0 GiLTheB,2017
 
 class GameLoop {
 
-  constructor(draw,setup,initialize) {
-    this.initialize=initialize||function(){return true;};
-    this.setup=setup||function(){return true;};
-    this.draw=draw||function(){return true;};
-    this.performance=window.performance;
+  constructor(initialize,process,draw) {
+    this.initialize=initialize||function(){};
+    this.process=process||function(){};
+    this.draw=draw||function(){};
     this.fpsTarget=8;
-
-    this.frameState=[];
-    this.frameState['fps']=8;
-    this.frameState['timeStamp']=-1;
-    this.frameState['frameCount']=1;
-    this.frameState['creationTime']=this.performance.now();
-
+    this.state={
+      fps:8,
+      frameCount:1,
+      creationTime:performance.now()
+      };
     this.frameTime=-1;
-
-    this.timeValue=-1;
-    this.timeDirty=true;
     }//end constructor
-
-  get fps(){
-    return this.frameState['fps'];
-  }//end fps get
-  get frameCount(){
-    return this.frameState['frameCount'];
-  }//end frameCount get
-  get timeStamp(){
-    return this.frameState['timeStamp'];
-  }//end timeStamp get
-  get creationTime(){
-    return this.frameState['creationTime'];
-  }//end creationTime get
 
   set fps(v){
     this.fpsTarget=v;
     }//end fps set
 
-  get time(){
-    this.timeValue=(this.timeDirty)?this.performance.now():this.timeValue;
-    this.timeDirty=false;
-    return this.timeValue;
-  }//end time get
-
-  get now(){
-    return this.performance.now();;
-  }//end time get
-
   set startTime(v){
     var that = this;
-    var now=this.time;
-
+    var now=performance.now();
     this.frameTime=(v>now)?v:now;
-
-    this.frameState['fps']=this.fpsTarget;
-    this.frameState['timeStamp']=this.frameTime;
-    this.frameState['frameCount']=1;
-    this.timeDirty=true;
-
+    this.state.fps=this.fpsTarget;
+    this.state.frameCount=1;
+    //console.log('starting');
     setTimeout(function(){that.run()},this.frameTime-now+1);
     }//end startTime set
 
   run(){
     var that=this;   
     var frame=0;
-    var now=this.time;
-    var fps=this.frameState['fps'];
-    var timeStamp=this.frameState['timeStamp'];
-    var frameCount=this.frameState['frameCount'];
+    var now=performance.now();
+    var fps=this.state.fps;
+    var timeStamp=this.state.timeStamp;
+    var frameCount=this.state.frameCount;
 
     if(this.frameTime<now){//should always be true
-
+      
       //initialize the gameloop for the next frame 
       this.initialize();
 
@@ -83,22 +50,20 @@ class GameLoop {
         }
         
       //next frame state
-      this.frameState['fps']=this.fpsTarget;
-      this.frameState['frameCount']=frame;
-      this.frameState['timeStamp']=this.frameTime;
+      this.state.fps=this.fpsTarget;
+      this.state.frameCount=frame;
       
       //pass the current gameloop states
-      this.setup(fps,frameCount,timeStamp);
+      this.process(frameCount,fps);
       
       //draw call
       requestAnimationFrame(function(){that.draw()});
 
+      setTimeout(function(){that.run()},this.frameTime-now+1);
       }
     else{
       //something wrong happened
+      console.log('wrong');
       }
-
-    this.timeDirty=true;
-    setTimeout(function(){that.run()}, this.frameTime-now+1);
     }//end run
   }//end GameLoop

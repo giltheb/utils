@@ -24,111 +24,16 @@
     }
     </style>
 </head>
-<script src="../js/gameloop.js"></script>
-<script>
+<body>
 
-var eventDirty = false;
-var gameState = 0;
-var output = [];
-var frameSync=0;
-
-var gameLoop=new GameLoop(draw,setup,initialize);
-    gameLoop.fps=8;
-    gameLoop.startTime=gameLoop.creationTime+1000;
-
-var screen;
-var log;
-
-function initDOM(){
-  screen=document.getElementById('screen');
-  log=document.getElementById('log');
-  }
-
-function initialize(){
-  // aka eventHandler
-  if(eventDirty){
-    var fps=parseFloat(document.getElementById('fps').value);
-    if(fps&&fps>0){gameLoop.fps=fps;}
-    else{document.getElementById('fps').value='ERROR';}
-    eventDirty=false;
-    }
-  }//end initialize
-
-function setup(fps,frameCount,timeStamp){
-  // aka gameStateHandler
-  var hour=0;
-  var minute=0;
-  var seconde=0;
-  var centiseconde=0;
-
-  output = [];
-  gameState += frameCount/fps;
-
-  hour=(gameState/3600)|0;
-  minute=(gameState/60-hour*60)|0;
-  seconde=(gameState-minute*60-hour*3600)|0;
-  centiseconde=((gameState-(gameState|0))*100)|0;
-
-  frameSync+=frameCount-1;
-
-  /////////hour//////////
-  output.push(' ');
-  if (hour < 10) {
-      output.push('0');
-      }
-  if (hour > 0) {
-    output.push(hour);
-    output.push(':');
-    }
-  else{
-    output.push('0:');
-  }          
-  /////////minute//////////  
-  if (minute < 10) {
-    output.push('0');
-    }
-  if (minute > 0) {
-    output.push(minute);
-    output.push(':');
-    }
-  else{
-    output.push('0:');
-    }         
-  /////////seconde////////// 
-  if (seconde < 10) {
-      output.push('0');
-      }
-  if (seconde > 0) {
-    output.push(seconde);
-    output.push(':');
-    }
-  else{
-    output.push('0:');
-    }
-  /////////centiseconde////////// 
-  if (centiseconde < 10) {
-    output.push('0');
-    }
-  output.push(centiseconde);
-  output.push(' ');
-  /////////////////////////////// 
-  }//end setup
-
-function draw() {
-  // draw
-  screen.innerText = output.join('');
-  log.innerText = frameSync;
-  }//end draw
-
-</script>
-
-<body onLoad="initDOM()">
   <h3>Game Clock</h3>
-
-  <div ><pre id="screen" class="clock"> 00:00:00:00 </pre></div>
+  <div ><pre id="DISP" class="clock"> 00:00:00:00 </pre></div>
   <br>
-  frame sync: <pre id="log">0</pre><br>
-  FPS: <input id="fps" type="text" value="8.0" size="12">
+  frame drop: <pre id="LOG">0</pre><br>
+  FPS: <input id="FPS" type="text" value="8.0" size="12">
   <input type="button" onclick="eventDirty=true;" value="change">
+
 </body>
+<script src="../js/gameloop.js"></script>
+<script src="gameclock.js"></script>
 </html>
