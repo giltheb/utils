@@ -22,12 +22,14 @@
 <body>
 
   <h3>Incremental Game</h3>
-  FPS: <input id="FPS" type="text" value="8.0">
-  <input type="button" onclick="eventDirty=true;" value="change">
+  FPS: <input id="FPS" type="text" value="16.0">
+  <button type="button" id="FPS_CHANGE">change</button>
   <br>
   <br>
-  <div>value: <pre id="DISP">  0.00u</pre></div>
-  <div>frame drop: <pre id="LOG">0</pre></div>
+  <div>value: <pre id="DISP">  0.00u</pre>
+    <button id="SLEEP">iddle mode</button>
+  </div>
+  <div>iddle frames: <pre id="LOG">0</pre></div>
 
 </body>
 <script src="../js/gameloop.js"></script>

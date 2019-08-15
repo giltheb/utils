@@ -2,68 +2,53 @@
 license CC BY 4.0 GiLTheB,2017
 */
 
-class GameLoop {
-
-  constructor(initialize,process,draw) {
+GameLoop = function(initialize,process,draw) {
     this.initialize=initialize||function(){};
     this.process=process||function(){};
     this.draw=draw||function(){};
     this.fpsTarget=8;
-    this.state={
-      fps:8,
-      frameCount:1,
-      creationTime:performance.now()
-      };
-    this.frameTime=-1;
+    this.oldFps=8;
+    this.creationTime=performance.now();
+    this.lastTime=-1;
+    this.timer=null;
     }//end constructor
 
-  set fps(v){
-    this.fpsTarget=v;
-    }//end fps set
-
-  set startTime(v){
-    var that = this;
-    var now=performance.now();
-    this.frameTime=(v>now)?v:now;
-    this.state.fps=this.fpsTarget;
-    this.state.frameCount=1;
-    //console.log('starting');
-    setTimeout(function(){that.run()},this.frameTime-now+1);
-    }//end startTime set
-
-  run(){
+GameLoop.prototype.run = function(){
     var that=this;   
     var frame=0;
+
     var now=performance.now();
-    var fps=this.state.fps;
-    var timeStamp=this.state.timeStamp;
-    var frameCount=this.state.frameCount;
+    var resync=this.lastTime;
+    var target=1000/this.fpsTarget;
+ 
+      while(resync<now){resync+=target;frame++;}
 
-    if(this.frameTime<now){//should always be true
-      
-      //initialize the gameloop for the next frame 
       this.initialize();
-
-      while(this.frameTime<now){
-        this.frameTime+=1000/this.fpsTarget;
-        frame++;
-        }
-        
-      //next frame state
-      this.state.fps=this.fpsTarget;
-      this.state.frameCount=frame;
-      
-      //pass the current gameloop states
-      this.process(frameCount,fps);
-      
-      //draw call
+      this.process(frame,this.oldFps);
       requestAnimationFrame(function(){that.draw()});
+     
+      this.oldFps=this.fpsTarget;
+      this.lastTime=resync;
 
-      setTimeout(function(){that.run()},this.frameTime-now+1);
-      }
-    else{
-      //something wrong happened
-      console.log('wrong');
-      }
+      this.timer=setTimeout(function(){that.run()},resync-now+1);
     }//end run
-  }//end GameLoop
+
+GameLoop.prototype.stop = function(){
+    clearTimeout(this.timer);
+    }//end stop
+
+GameLoop.prototype.start=function(v){
+        var that = this;
+        var now=performance.now();
+        this.lastTime=(v>now)?v:now;
+        this.timer=setTimeout(function(){that.run()},this.lastTime-now+1);
+        }//end start
+
+Object.defineProperties(GameLoop.prototype, {
+    fps:{configurable:!0, enumerable:!0,
+      set:function(v){
+        this.fpsTarget=v;
+        }//end fps
+      }
+    }
+  );

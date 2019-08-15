@@ -1,7 +1,7 @@
 <html>
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-  <title>clock</title>
+  <title>stopwatch</title>
   <style type="text/css">
     body {
      margin: 3em 0px 0px 5.5em;
@@ -26,14 +26,18 @@
 </head>
 <body>
 
-  <h3>Game Clock</h3>
-  <div ><pre id="DISP" class="clock"> 00:00:00:00 </pre></div>
+  <h3>Stopwatch</h3>
+  <div >
+    <pre id="DISP" class="clock"> 00:00:00:00 </pre>
+    <button id="START" >start</button>
+    <button id="STOP" >stop</button>
+  </div>
   <br>
   frame drop: <pre id="LOG">0</pre><br>
-  FPS: <input id="FPS" type="text" value="8.0" size="12">
-  <input type="button" onclick="eventDirty=true;" value="change">
+  FPS: <input id="FPS" type="text" value="16.0" size="12">
+  <button id="FPS_CHANGE" >change</button>
 
 </body>
 <script src="../js/gameloop.js"></script>
-<script src="gameclock.js"></script>
+<script src="stopwatch.js"></script>
 </html>

@@ -1,18 +1,30 @@
-eventDirty = false;
+fpsDirty = false;
+active = false;
 elapse = 0;
 output = '';
 frameDrop=0;
 
+/////////////////////////////////////////////////
+START.addEventListener("click", start, false);
+STOP.addEventListener("click", stop, false);
+FPS_CHANGE.addEventListener("click", change, false);
+
+function start(e){if(!active){gameLoop.start(performance.now());active=true;elapse=0;frameDrop=0;}}
+
+function stop(e){gameLoop.stop();active=false;}
+
+function change(e){fpsDirty=true;}
+/////////////////////////////////////////////////
+
 gameLoop=new GameLoop(initialize,process,draw);
-gameLoop.fps=8;
-gameLoop.startTime=gameLoop.state.creationTime+1000;
+gameLoop.fps=16;
 
 function initialize(){
-  if(eventDirty){
+  if(fpsDirty){
     var fps=parseFloat(FPS.value);
     if(fps&&fps>0){gameLoop.fps=fps;}
     else{FPS.value='ERROR';}
-    eventDirty=false;
+    fpsDirty=false;
     }
   }//end initialize
 
